@@ -3,7 +3,7 @@ FROM ubuntu:xenial
 MAINTAINER Samuel Terburg <samuel.terburg@panther-it.nl>
 
 RUN apt-get update && \
-    apt-get install -y python-software-properties software-properties-common glusterfs-server supervisor openssh-server dnsutils sshpass && \
+    apt-get install -y python-software-properties software-properties-common glusterfs-server supervisor openssh-server dnsutils sshpass iproute2 && \
     rm -rf /var/cache
 
 ENV ROOT_PASSWORD **ChangeMe**
