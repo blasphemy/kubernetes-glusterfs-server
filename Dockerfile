@@ -1,12 +1,10 @@
-FROM ubuntu:14.04
+FROM ubuntu:xenial
 
 MAINTAINER Samuel Terburg <samuel.terburg@panther-it.nl>
 
 RUN apt-get update && \
-    apt-get install -y python-software-properties software-properties-common
-RUN add-apt-repository -y ppa:gluster/glusterfs-3.5 && \
-    apt-get update && \
-    apt-get install -y glusterfs-server supervisor openssh-server dnsutils sshpass
+    apt-get install -y python-software-properties software-properties-common glusterfs-server supervisor openssh-server dnsutils sshpass && \
+    rm -rf /var/cache
 
 ENV ROOT_PASSWORD **ChangeMe**
 
@@ -23,15 +21,13 @@ ENV DEBUG 0
 
 VOLUME ["${GLUSTER_BRICK_PATH}"]
 
-RUN mkdir -p /var/run/sshd /root/.ssh /var/log/supervisor
-RUN perl -p -i -e "s/^Port .*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config
-RUN perl -p -i -e "s/#?PasswordAuthentication .*/PasswordAuthentication yes/g" /etc/ssh/sshd_config
-RUN perl -p -i -e "s/#?PermitRootLogin .*/PermitRootLogin yes/g" /etc/ssh/sshd_config
-RUN grep ClientAliveInterval /etc/ssh/sshd_config >/dev/null 2>&1 || echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
-
-RUN mkdir -p /usr/local/bin
+RUN mkdir -p /var/run/sshd /root/.ssh /var/log/supervisor && \
+    perl -p -i -e "s/^Port .*/Port ${SSH_PORT}/g" /etc/ssh/sshd_config && \
+    perl -p -i -e "s/#?PasswordAuthentication .*/PasswordAuthentication yes/g" /etc/ssh/sshd_config && \
+    perl -p -i -e "s/#?PermitRootLogin .*/PermitRootLogin yes/g" /etc/ssh/sshd_config && \
+    grep ClientAliveInterval /etc/ssh/sshd_config >/dev/null 2>&1 || echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config && \
+    mkdir -p /usr/local/bin
 ADD ./bin /usr/local/bin
 RUN chmod +x /usr/local/bin/*.sh
 ADD ./etc/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 CMD ["/usr/local/bin/run.sh"]
